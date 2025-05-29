@@ -33,4 +33,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest ../../tests/backend/unit_backend.py
+        pytest ./tests/backend/unit_backend.py
