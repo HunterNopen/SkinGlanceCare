@@ -1,14 +1,17 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
-from app import analysis, auth, models
-from app.db import SessionLocal, engine, Base
-from app.schemas import UserCreate
-from app.crud import get_user_by_name, create_user
-from app.auth import get_current_user
-
-
+import analysis, auth, models
+from db import SessionLocal, engine, Base
+from schemas import UserCreate
+from crud import get_user_by_name, create_user
+from auth import get_current_user
 
 app = FastAPI()
 app.include_router(analysis.router)

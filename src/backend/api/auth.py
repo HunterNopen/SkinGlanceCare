@@ -5,14 +5,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
 from starlette import status
-from app.crud import get_user_by_name
-from app.db import SessionLocal
+from crud import get_user_by_name
+from db import SessionLocal
 from sqlalchemy.orm import Session
-from app.db import get_db
+from db import get_db
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from app.models import User
-from jose import jwt, JWTError
+from models import User
+from jose import jwt
+from jose.exceptions import JWTError
 from fastapi.security import OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 router = APIRouter(

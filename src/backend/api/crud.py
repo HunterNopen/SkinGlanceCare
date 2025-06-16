@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .models import User
+from models import User
 from passlib.hash import bcrypt
 
 def get_user_by_name(db: Session, name: str):
