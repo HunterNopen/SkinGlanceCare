@@ -7,11 +7,11 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
-import analysis, auth, models
-from db import SessionLocal, engine, Base
-from schemas import UserCreate
-from crud import get_user_by_name, create_user
-from auth import get_current_user
+from src.backend.api import analysis, auth, models
+from src.backend.api.db import SessionLocal, engine, Base
+from src.backend.api.schemas import UserCreate
+from src.backend.api.crud import get_user_by_name, create_user
+from src.backend.api.auth import get_current_user
 
 app = FastAPI()
 app.include_router(analysis.router)
@@ -45,11 +45,11 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 # # Testowy endpoint chroniony tokenem
-# @app.get("/")
-# async def user(user: user_dependency, db: db_dependency):
-#     if user is None:
-#         raise HTTPException(status_code=401, detail="Unauthorized")
-#     return {"User": user}
+@app.get("/")
+async def user(user: user_dependency, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return {"User": user}
 
 # # (opcjonalnie) GET user by ID (dla testów)
 # @app.get("/users/{user_id}")

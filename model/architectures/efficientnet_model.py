@@ -7,6 +7,8 @@ import seaborn as sns
 import os
 import csv
 import numpy as np
+import torchvision.models as models
+from model.helpers.cross_entropy_smoithin_loss import LabelSmoothingCrossEntropy
 
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
@@ -14,7 +16,7 @@ import matplotlib.pyplot as plt
 class EfficientNetV2Model(pl.LightningModule):
   def __init__(self, num_classes = 8):
     super().__init__()
-
+    efficientnet_model = models.efficientnet_b0(weights = models.EfficientNet_B0_Weights.IMAGENET1K_V1)
     self.backbone = efficientnet_model.features
     self.pooling = lambda x: F.adaptive_max_pool2d(x, 1)
 
@@ -171,13 +173,13 @@ class EfficientNetV2Model(pl.LightningModule):
           
           if not file_exists:
               head = ["epoch"]
-              for col in df.columns[1:]:
+              for col in range(1, 9):
                   for key in metrics.keys():
                       head.append(f'{col}_{key}')
               writer.writerow(head)
 
           row = [self.current_epoch]
-          for i in range(len(df.columns[1:])):
+          for i in range(len(range(1, 9))):
               for key in metrics.keys():
                   row.append(metrics[key][i])               
           writer.writerow(row)
@@ -185,7 +187,7 @@ class EfficientNetV2Model(pl.LightningModule):
   def plot_confusion_matrix(self, cm, title = "Validation"):      
     cmn = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
     fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(cmn, annot=True, fmt='.2f', cmap="Blues", ax=ax, xticklabels=df.columns[1:], yticklabels=df.columns[1:])
+    sns.heatmap(cmn, annot=True, fmt='.2f', cmap="Blues", ax=ax, xticklabels=range(1, 9), yticklabels=range(1, 9))
     ax.set_xlabel("Predicted labels")
     ax.set_ylabel("True labels")
 

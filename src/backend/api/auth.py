@@ -5,13 +5,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
 from starlette import status
-from crud import get_user_by_name
-from db import SessionLocal
+from src.backend.api.crud import get_user_by_name
+from src.backend.api.db import SessionLocal
 from sqlalchemy.orm import Session
-from db import get_db
+from src.backend.api.db import get_db
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from models import User
+from src.backend.api.models import User
 from jose import jwt
 from jose.exceptions import JWTError
 from fastapi.security import OAuth2PasswordBearer
