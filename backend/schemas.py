@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import Optional
+from typing import Optional, List
 import datetime
 
 # -------------------------------
@@ -54,6 +54,25 @@ class ImageBase(BaseModel):
     upload_time: datetime.datetime
     status: str
     result: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+
+class ImagePredictionConfidence(BaseModel):
+    label: str
+    confidence: float
+
+
+class ImageAnalysisResponse(BaseModel):
+    image_id: int
+    predicted_class: str
+    predicted_class_full: str
+    predicted_probability: float
+    confidence_score: float
+    confidence_top3_score: float
+    confidences: List[ImagePredictionConfidence]
+    llm_message: str
 
     class Config:
         orm_mode = True

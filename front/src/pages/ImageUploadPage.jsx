@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 
 import uploadIcon from "../assets/img/cloud-computing.png";
 import { uploadImage } from "../api/ImageUploadApi";
+import Result from "../components/Result";
 
 const ImageUploadPage = () => {
   const [image, setImage] = useState(null);
@@ -151,11 +152,7 @@ const ImageUploadPage = () => {
       )}
 
       {/* Pokazanie wyniku lub błędu */}
-      {uploadResult && (
-        <div className="mt-5 p-4 bg-green-100 text-green-700 rounded">
-          Result: {uploadResult.result}
-        </div>
-      )}
+      {uploadResult && <Result analysis={uploadResult} />}
 
       {error && (
         <div className="mt-5 p-4 bg-red-100 text-red-700 rounded">
