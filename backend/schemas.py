@@ -72,6 +72,9 @@ class ImageAnalysisResponse(BaseModel):
     confidence_score: float
     confidence_top3_score: float
     confidences: List[ImagePredictionConfidence]
+
+class LLMMessageResponse(BaseModel):
+    image_id: int
     llm_message: str
 
     class Config:

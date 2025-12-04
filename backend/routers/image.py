@@ -12,6 +12,7 @@ from backend.llm_helper import build_gemini_message, CLASS_FULL_NAME
 import math
 import shutil
 import os
+import json
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
@@ -145,13 +146,11 @@ def upload_image(
         user_id=current_user.id,
         filename=filename,
         status="uploaded",
-        result=str(result),
+        result=json.dumps(result),
     )
     db.add(image)
     db.commit()
     db.refresh(image)
-
-    llm_message = build_gemini_message(result, confidence_score, confidence_top3_score)
 
     predicted_class_full = CLASS_FULL_NAME.get(label, label)
 
@@ -171,8 +170,32 @@ def upload_image(
         confidence_score=confidence_score,
         confidence_top3_score=confidence_top3_score,
         confidences=response_confidences,
-        llm_message=llm_message,
     )
+@router.get("/{image_id}/llm_message", response_model=schemas.LLMMessageResponse)
+def get_llm_message(image_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    image = (
+        db.query(models.Image)
+        .filter(models.Image.id == image_id, models.Image.user_id == current_user.id)
+        .first()
+    )
+
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found or access denied")
+
+    try:
+        result = json.loads(image.result)
+    except Exception:
+        result = eval(image.result, {"__builtins__": None}, {})
+        
+    label = result.get("label")
+
+    confidences = result.get("confidences", [])
+    confidence_score = _compute_confidence_score(confidences, label)
+    confidence_top3_score = _compute_top3_confidence(confidences)
+    
+    llm_message = build_gemini_message(result, confidence_score, confidence_top3_score)
+    
+    return schemas.LLMMessageResponse(image_id=image.id, llm_message=llm_message)
 
 
 @router.get("/{image_id}", response_model=schemas.ImageBase)

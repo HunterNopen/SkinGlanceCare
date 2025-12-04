@@ -1,13 +1,19 @@
+
+import React, { useEffect, useState } from "react";
+
 const Result = ({ analysis }) => {
+  const [llmMessage, setLlmMessage] = useState("");
+  const [loadingLlm, setLoadingLlm] = useState(false);
+
   if (!analysis) return null;
 
   const {
+    image_id,
     predicted_class,
     predicted_class_full,
     predicted_probability,
     confidence_score,
     confidence_top3_score,
-    llm_message,
   } = analysis;
 
   const percentage = (predicted_probability * 100).toFixed(1);
@@ -16,6 +22,35 @@ const Result = ({ analysis }) => {
     typeof confidence_top3_score === "number"
       ? confidence_top3_score.toFixed(1)
       : "-";
+
+  useEffect(() => {
+    let cancelled = false;
+    if (image_id) {
+      setLoadingLlm(true);
+      setLlmMessage("");
+      fetch(`http://localhost:8000/images/${image_id}/llm_message`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!cancelled) {
+            setLlmMessage(data.llm_message);
+            setLoadingLlm(false);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setLlmMessage("Could not load explanation.");
+            setLoadingLlm(false);
+          }
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [image_id]);
 
   return (
     <div className="mt-10 w-full max-w-4xl mx-auto bg-white shadow-md rounded-3xl p-10 text-center">
@@ -64,8 +99,18 @@ const Result = ({ analysis }) => {
         </div>
       </div>
 
-      <div className="mt-4 text-left bg-[#F5FAFA] rounded-2xl p-6 max-h-96 overflow-y-auto">
-        <p className="text-base text-gray-700 whitespace-pre-line">{llm_message}</p>
+      <div className="mt-4 text-left bg-[#F5FAFA] rounded-2xl p-6 max-h-96 overflow-y-auto min-h-[120px] flex items-center justify-center">
+        {loadingLlm ? (
+          <div className="w-full flex flex-col items-center justify-center">
+            <span className="text-lg text-[#4DA19F] font-semibold mb-2">Loading explanation...</span>
+            <svg className="animate-spin h-8 w-8 text-[#4DA19F]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+          </div>
+        ) : (
+          <p className="text-base text-gray-700 whitespace-pre-line">{llmMessage}</p>
+        )}
       </div>
     </div>
   );
