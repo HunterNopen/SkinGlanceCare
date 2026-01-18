@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
+from email.mime import image
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from backend.db.database import get_db
 from backend.db import schemas
@@ -10,7 +11,7 @@ from backend.utils.validate_image import validate_image
 from gradio_client import Client, handle_file
 
 from backend.config import GRADIO_URL
-from backend.llm_helper import build_gemini_message, CLASS_FULL_NAME
+from backend.utils.llm_helper import build_gemini_message, CLASS_FULL_NAME
 
 import math
 import shutil
@@ -108,78 +109,22 @@ def _compute_top3_confidence(confidences):
     return raw * 100.0
 
 
-# @router.post(
-#     "/upload/",
-#     response_model=schemas.ImageAnalysisResponse,
-#     status_code=status.HTTP_201_CREATED,
-# )
-# def upload_image(
-#     file: UploadFile = File(...),
-#     db: Session = Depends(get_db),
-#     current_user: models.User = Depends(get_current_user),
-# ):
-
-#     validate_image(file)
-#     clear_metadata(file)
-
-#     filename = f"{current_user.id}_{file.filename}"
-#     file_path = os.path.join(UPLOAD_DIR, filename)
-
-#     with open(file_path, "wb") as buffer:
-#         shutil.copyfileobj(file.file, buffer)
-
-#     try:
-#         client = get_gradio_client()
-#         result = client.predict(
-#             image=handle_file(file_path),
-#             api_name="/predict_openvino",
-#         )
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Gradio model error: {str(e)}")
-
-#     if not isinstance(result, dict) or "label" not in result:
-#         raise HTTPException(status_code=500, detail="Unexpected model result format")
-
-#     label = result.get("label")
-#     confidences = result.get("confidences", [])
-
-#     predicted_probability = 0.0
-#     if confidences:
-#         predicted_probability = float(confidences[0].get("confidence", 0.0))
-
-#     confidence_score = _compute_confidence_score(confidences, label)
-#     confidence_top3_score = _compute_top3_confidence(confidences)
-
-
-#     image = models.Image(
-#         user_id=current_user.id,
-#         filename=filename,
-#         status="uploaded",
-#         result=json.dumps(result),
-#     )
-#     db.add(image)
-#     db.commit()
-#     db.refresh(image)
-
-#     predicted_class_full = CLASS_FULL_NAME.get(label, label)
-
-#     response_confidences = [
-#         schemas.ImagePredictionConfidence(
-#             label=item.get("label", "?"),
-#             confidence=float(item.get("confidence", 0.0)),
-#         )
-#         for item in confidences
-#     ]
-
-#     return schemas.ImageAnalysisResponse(
-#         image_id=image.id,
-#         predicted_class=label,
-#         predicted_class_full=predicted_class_full,
-#         predicted_probability=predicted_probability,
-#         confidence_score=confidence_score,
-#         confidence_top3_score=confidence_top3_score,
-#         confidences=response_confidences,
-#     )
+@router.get("/history", response_model=list[schemas.ImageOut])
+def get_images_history(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(8, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    images = (
+        db.query(models.Image)
+        .filter(models.Image.user_id == current_user.id)
+        .order_by(models.Image.upload_time.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return images
 
 
 @router.post(
@@ -193,7 +138,6 @@ def upload_image(
     current_user: models.User = Depends(get_current_user),
 ):
 
-    # Walidacja i czyszczenie metadata
     validate_image(file)
     clear_metadata(file)
 
@@ -203,7 +147,6 @@ def upload_image(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # Wywołanie modelu Gradio
     try:
         client = get_gradio_client()
         result = client.predict(
@@ -219,29 +162,25 @@ def upload_image(
     label = result.get("label")
     confidences = result.get("confidences", [])
 
-    # Obliczenie metryk
     predicted_probability = float(confidences[0]["confidence"]) if confidences else 0
     confidence_score = _compute_confidence_score(confidences, label)
     confidence_top3_score = _compute_top3_confidence(confidences)
 
-    # Dodanie metryk do zapisywanego JSONa
     result["predicted_class_full"] = CLASS_FULL_NAME.get(label, label)
     result["predicted_probability"] = predicted_probability
     result["confidence_score"] = confidence_score
     result["confidence_top3_score"] = confidence_top3_score
 
-    # Zapis do bazy
     image = models.Image(
         user_id=current_user.id,
         filename=filename,
         status="uploaded",
-        result=json.dumps(result),  # <-- pełny wynik
+        result=json.dumps(result),
     )
     db.add(image)
     db.commit()
     db.refresh(image)
 
-    # Przygotowanie odpowiedzi API
     response_confidences = [
         schemas.ImagePredictionConfidence(
             label=item.get("label", "?"),
@@ -289,6 +228,11 @@ def get_llm_message(
 
     llm_message = build_gemini_message(result, confidence_score, confidence_top3_score)
 
+    result["llm_message"] = llm_message
+
+    image.result = json.dumps(result, ensure_ascii=False)
+    db.commit()
+
     return schemas.LLMMessageResponse(image_id=image.id, llm_message=llm_message)
 
 
@@ -321,31 +265,6 @@ def get_image_status(
         raise HTTPException(status_code=404, detail="Image not found or access denied")
 
     return image
-
-
-# @router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
-# def delete_image(
-#     image_id: int,
-#     db: Session = Depends(get_db),
-#     current_user: models.User = Depends(get_current_user),
-# ):
-#     image = (
-#         db.query(models.Image)
-#         .filter(models.Image.id == image_id, models.Image.user_id == current_user.id)
-#         .first()
-#     )
-
-#     if not image:
-#         raise HTTPException(status_code=404, detail="Image not found or access denied")
-
-#     file_path = os.path.join(UPLOAD_DIR, image.filename)
-#     if os.path.exists(file_path):
-#         os.remove(file_path)
-
-#     db.delete(image)
-#     db.commit()
-
-#     return status.HTTP_200_OK
 
 
 @router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)

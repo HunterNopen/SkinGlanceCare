@@ -42,7 +42,7 @@ def validate_image(file: UploadFile):
 
     if width > MAX_WIDTH or height > MAX_HEIGHT:
         raise HTTPException(
-            status_code=400, detail=f"Too large resoluyion ({width}x{height})"
+            status_code=400, detail=f"Too large resolution ({width}x{height})"
         )
 
     file.file.seek(0)

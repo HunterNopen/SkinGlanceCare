@@ -2,6 +2,7 @@ from PIL import Image
 from fastapi import HTTPException, UploadFile
 from io import BytesIO
 
+
 def clear_metadata(file: UploadFile) -> None:
     file.file.seek(0)
 

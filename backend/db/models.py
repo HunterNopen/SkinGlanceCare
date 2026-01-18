@@ -6,6 +6,7 @@ import enum
 from sqlalchemy.types import Enum
 from sqlalchemy import Boolean
 
+
 class GenderEnum(str, enum.Enum):
     male = "male"
     female = "female"
@@ -15,19 +16,20 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    email = Column(String, unique=True, index=True, nullable=False)      
-    password = Column(String, nullable=False)                             
-    name = Column(String, nullable=False)                           
-
-    age = Column(Integer, nullable=True)
-    gender = Column(Enum(GenderEnum), nullable=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)
+    name = Column(String, nullable=False)
 
     is_verified = Column(Boolean, default=False)
-    is_admin = Column(Boolean, default=False, nullable=False)
     verification_code = Column(String, nullable=True)
 
     created_at = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now, nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=datetime.datetime.now,
+        onupdate=datetime.datetime.now,
+        nullable=False,
+    )
 
     images = relationship("Image", back_populates="user", cascade="all, delete-orphan")
 

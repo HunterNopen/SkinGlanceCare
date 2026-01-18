@@ -6,69 +6,26 @@ from backend.db.models import GenderEnum
 from pydantic import Field
 
 
-# -------------------------------
-# Podstawowy schemat użytkownika
 class UserBase(BaseModel):
     email: EmailStr
     name: str
 
-    age: Optional[int] = Field(
-        default=None,
-        ge=0,
-        le=120,
-    )
-    gender: Optional[GenderEnum] = None
 
-
-# -------------------------------
-# Schemat do tworzenia użytkownika
 class UserCreate(UserBase):
-    password: constr(min_length=6)  # wymagane
+    password: constr(min_length=6)
 
 
-# -------------------------------
-# Schemat logowania
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
 
-# -------------------------------
-# Schemat aktualizacji użytkownika
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[constr(min_length=6)] = None
     name: Optional[str] = None
 
-    age: Optional[int] = Field(
-        default=None,
-        ge=0,
-        le=120,
-    )
-    gender: Optional[GenderEnum] = None
 
-
-class AdminUserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    password: Optional[constr(min_length=6)] = None
-    name: Optional[str] = None
-
-    age: Optional[int] = Field(
-        default=None,
-        ge=0,
-        le=120,
-    )
-    gender: Optional[GenderEnum] = None
-    is_verified: Optional[bool] = None
-    is_admin: Optional[bool] = None
-    verification_code: Optional[str] = None
-
-    class Config:
-        extra = "forbid"
-
-
-# -------------------------------
-# Schemat wyjściowy
 class UserOut(UserBase):
     id: int
     created_at: datetime.datetime
@@ -78,15 +35,11 @@ class UserOut(UserBase):
         orm_mode = True
 
 
-# -------------------------------
-# Token
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
 
-# -------------------------------
-# Schemat obrazu
 class ImageBase(BaseModel):
     id: int
     filename: str
@@ -126,7 +79,6 @@ class ImageOut(ImageBase):
 
 
 class VerifyEmail(BaseModel):
-    # email: EmailStr
     code: str
 
 
@@ -134,7 +86,26 @@ class ResendEmail(BaseModel):
     email: str
 
 
+class ForgotPassword(BaseModel):
+    email: str
+
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: constr(min_length=6)
+
+
 class MailBody(BaseModel):
     to: List[str]
     subject: str
     body: str
+
+
+class ImageOut(ImageBase):
+    user_id: int
+    result: Optional[str] = None
+
+
+class ContactForm(BaseModel):
+    email: EmailStr
+    message: str = Field(..., min_length=10, max_length=2000)

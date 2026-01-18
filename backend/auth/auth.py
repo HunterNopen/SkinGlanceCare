@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from backend.db.database import get_db
 from backend.db import models
-from backend.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.config import RESET_PASSWORD_EXPIRE_MINUTES, RESET_PASSWORD_SECRET, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -47,12 +47,30 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
-def get_current_admin(
-    current_user: models.User = Depends(get_current_user),
-):
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
+def create_reset_password_token(email: str):
+    payload = {
+        "sub": email,
+        "purpose": "password_reset",
+        "exp": datetime.utcnow() + timedelta(minutes=RESET_PASSWORD_EXPIRE_MINUTES),
+        "iat": datetime.utcnow(),
+    }
+    return jwt.encode(
+        payload,
+        RESET_PASSWORD_SECRET,
+        algorithm=ALGORITHM,
+    )
+
+
+def verify_reset_password_token(token: str) -> str | None:
+    try:
+        payload = jwt.decode(
+            token,
+            RESET_PASSWORD_SECRET,
+            algorithms=[ALGORITHM],
         )
-    return current_user
+        if payload.get("purpose") != "password_reset":
+            return None
+        return payload.get("sub")
+    except JWTError:
+        return None
+
