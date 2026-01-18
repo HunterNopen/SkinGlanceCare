@@ -1,24 +1,49 @@
 from fastapi import FastAPI, Depends, status, HTTPException, Response
-from backend.database import engine, get_db
-import backend.models as models
+from backend.auth import auth
+from backend.db.database import engine, get_db
+from backend.db import models
+import backend.db.models as models
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-
-from backend import models, schemas
-from backend.database import engine, get_db
-from backend.utils import hash_password, verify_password
-from backend.auth import create_access_token, verify_access_token
+from fastapi.staticfiles import StaticFiles
+from backend.db import schemas
+from backend.db.database import engine, get_db
+from backend.auth.utils import hash_password, verify_password
+from backend.auth.auth import create_access_token, verify_access_token
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from backend.routers import image
+from backend.routers import access, image, user
 from fastapi.middleware.cors import CORSMiddleware
-models.Base.metadata.create_all(bind=engine)
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from contextlib import asynccontextmanager
+from sqlalchemy.exc import OperationalError
+import logging
+from backend.utils.rate_limiter import limiter
+from slowapi.middleware import SlowAPIMiddleware
+from backend.utils.generate_verification_code import generate_verification_code
+from backend.utils.send_email import send_verification_email
 
-app = FastAPI()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        models.Base.metadata.create_all(bind=engine)
+        logging.info("Database connection successful.")
+    except OperationalError as e:
+        logging.error(f"Database connection failed during startup: {e}")
+        logging.warning("Server is running, but DB-dependent features will fail.")
+    except Exception as e:
+        logging.critical(f"Unexpected error during database initialization: {e}")
+
+    yield
+    logging.info("Shutting down application...")
+
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
-    "http://localhost:5173",  # Twój frontend
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
@@ -29,96 +54,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(SlowAPIMiddleware)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 app.include_router(image.router)
+app.include_router(user.router)
+app.include_router(access.router)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello, World!"}
-
-
-@app.get("/users/{user_id}", response_model=schemas.UserOut)
-async def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if user is None:
-        return {"error": "User not found"}
-    return user
-
-@app.post("/add_user/", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
-def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(models.User).filter(models.User.email == user_in.email).first()
-    if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
-    if len(user_in.password) < 6:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Password must be at least 6 characters long"
-            )
-    
-    user = models.User(
-        email=user_in.email,
-        password=hash_password(user_in.password),
-        phone_number=user_in.phone_number,
-        first_name=user_in.first_name,
-        last_name=user_in.last_name
-    )
-    db.add(user)
-    try:
-        db.commit()
-        db.refresh(user)
-    except IntegrityError as e:
-        db.rollback()
-        print("IntegrityError:", e.args)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered (IntegrityError)"
-        )
-    except Exception as e:
-        db.rollback()
-        print("Unexpected exception:", e)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error: {str(e)}"
-        )
-    
-    
-
-    return user
-
-
-@app.post("/login/", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
-        )
-    access_token_expires = timedelta(minutes=60)
-    access_token = create_access_token(
-        data={"user_id": user.id}, expires_delta=access_token_expires
-    )
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name
-        }
-    }
-
-@app.get("/protected-route/")
-def protected_route(current_user: dict = Depends(verify_access_token)):
-    if current_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token"
-        )
-    return {"message": f"Hello, {current_user['sub']}! This is a protected route."}
+@app.get("/health", tags=["system"])
+async def health_check():
+    return {"status": "ok"}

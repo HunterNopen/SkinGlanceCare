@@ -1,7 +1,7 @@
-import {getAuthToken} from "../util/auth.js";
+import { getToken } from "../util/auth.js";
 
-const API_URL = "http://localhost:8000/images"; // Twój backend
-const token = getAuthToken();
+const API_URL = "http://localhost:8000/images";
+const token = getToken();
 export async function uploadImage(file, token) {
   if (!file) throw new Error("No file provided");
 

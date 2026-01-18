@@ -1,13 +1,17 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
+from email.mime import image
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from backend.database import get_db
-from backend import models, schemas
-from backend.auth import get_current_user
+from backend.db.database import get_db
+from backend.db import schemas
+from backend.auth.auth import get_current_user
 
+from backend.db import models
+from backend.utils.clear_metadata import clear_metadata
+from backend.utils.validate_image import validate_image
 from gradio_client import Client, handle_file
 
 from backend.config import GRADIO_URL
-from backend.llm_helper import build_gemini_message, CLASS_FULL_NAME
+from backend.utils.llm_helper import build_gemini_message, CLASS_FULL_NAME
 
 import math
 import shutil
@@ -104,6 +108,25 @@ def _compute_top3_confidence(confidences):
 
     return raw * 100.0
 
+
+@router.get("/history", response_model=list[schemas.ImageOut])
+def get_images_history(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(8, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    images = (
+        db.query(models.Image)
+        .filter(models.Image.user_id == current_user.id)
+        .order_by(models.Image.upload_time.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    return images
+
+
 @router.post(
     "/upload/",
     response_model=schemas.ImageAnalysisResponse,
@@ -114,6 +137,10 @@ def upload_image(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+
+    validate_image(file)
+    clear_metadata(file)
+
     filename = f"{current_user.id}_{file.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
 
@@ -135,12 +162,14 @@ def upload_image(
     label = result.get("label")
     confidences = result.get("confidences", [])
 
-    predicted_probability = 0.0
-    if confidences:
-        predicted_probability = float(confidences[0].get("confidence", 0.0))
-
+    predicted_probability = float(confidences[0]["confidence"]) if confidences else 0
     confidence_score = _compute_confidence_score(confidences, label)
     confidence_top3_score = _compute_top3_confidence(confidences)
+
+    result["predicted_class_full"] = CLASS_FULL_NAME.get(label, label)
+    result["predicted_probability"] = predicted_probability
+    result["confidence_score"] = confidence_score
+    result["confidence_top3_score"] = confidence_top3_score
 
     image = models.Image(
         user_id=current_user.id,
@@ -151,8 +180,6 @@ def upload_image(
     db.add(image)
     db.commit()
     db.refresh(image)
-
-    predicted_class_full = CLASS_FULL_NAME.get(label, label)
 
     response_confidences = [
         schemas.ImagePredictionConfidence(
@@ -165,14 +192,20 @@ def upload_image(
     return schemas.ImageAnalysisResponse(
         image_id=image.id,
         predicted_class=label,
-        predicted_class_full=predicted_class_full,
+        predicted_class_full=result["predicted_class_full"],
         predicted_probability=predicted_probability,
         confidence_score=confidence_score,
         confidence_top3_score=confidence_top3_score,
         confidences=response_confidences,
     )
+
+
 @router.get("/{image_id}/llm_message", response_model=schemas.LLMMessageResponse)
-def get_llm_message(image_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def get_llm_message(
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     image = (
         db.query(models.Image)
         .filter(models.Image.id == image_id, models.Image.user_id == current_user.id)
@@ -186,16 +219,34 @@ def get_llm_message(image_id: int, db: Session = Depends(get_db), current_user: 
         result = json.loads(image.result)
     except Exception:
         result = eval(image.result, {"__builtins__": None}, {})
-        
+
     label = result.get("label")
 
     confidences = result.get("confidences", [])
     confidence_score = _compute_confidence_score(confidences, label)
     confidence_top3_score = _compute_top3_confidence(confidences)
-    
+
     llm_message = build_gemini_message(result, confidence_score, confidence_top3_score)
-    
+
+    result["llm_message"] = llm_message
+
+    image.result = json.dumps(result, ensure_ascii=False)
+    db.commit()
+
     return schemas.LLMMessageResponse(image_id=image.id, llm_message=llm_message)
+
+
+@router.get("/", response_model=list[schemas.ImageBase])
+def list_images(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    return (
+        db.query(models.Image)
+        .filter(models.Image.user_id == current_user.id)
+        .order_by(models.Image.upload_time.desc())
+        .all()
+    )
 
 
 @router.get("/{image_id}", response_model=schemas.ImageBase)
@@ -214,3 +265,28 @@ def get_image_status(
         raise HTTPException(status_code=404, detail="Image not found or access denied")
 
     return image
+
+
+@router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_image(
+    image_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    image = (
+        db.query(models.Image)
+        .filter(models.Image.id == image_id, models.Image.user_id == current_user.id)
+        .first()
+    )
+
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found or access denied")
+
+    file_path = os.path.join(UPLOAD_DIR, image.filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    db.delete(image)
+    db.commit()
+
+    return

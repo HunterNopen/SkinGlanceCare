@@ -1,13 +1,13 @@
 import { Form, Link, useNavigation, useSearchParams } from "react-router-dom";
 
 import React from "react";
-import bodyImg2 from "../assets/img/bodyImg2.jpg";
+import bodyImg2 from "../assets/img/back.png";
 import { useActionData } from "react-router-dom";
 
 const FinalForm = () => {
   const data = useActionData();
-  const navigation = useNavigation()
-  const isSubmiting = navigation.state === 'submitting'
+  const navigation = useNavigation();
+  const isSubmiting = navigation.state === "submitting";
 
   const [searchParams] = useSearchParams();
   const isLogin = searchParams.get("mode") === "login";
@@ -17,6 +17,7 @@ const FinalForm = () => {
       <section className="w-full mx-auto h-[85%] bg-white flex flex-row px-[5%] 2xl:px-[10%]">
         <Form
           method="post"
+          action={`/auth?mode=${isLogin ? "login" : "add_user"}`}
           className="lg:w-[60%] w-full flex flex-col justify-center items-center lg:items-stretch 2xl:py-20"
         >
           <h1 className="2xl:text-5xl text-5xl font-semibold 2xl:my-20 my-10 capitalize">
@@ -27,7 +28,7 @@ const FinalForm = () => {
                 ))}
               </ul>
             )}
-            {data &&  data.message && <li>{data.message}</li>}
+            {data && data.message && <li>{data.message}</li>}
             {isLogin ? "Sign in" : "Sign up"}
           </h1>
 
@@ -122,7 +123,7 @@ const FinalForm = () => {
         <div className="lg:flex hidden w-[40%] justify-center items-center overflow-hidden m-5 ">
           <img
             src={bodyImg2}
-            className="w-full h-auto object-contain rounded-2xl"
+            className="w-full h-[80%]  rounded-2xl"
             alt="background"
           />
         </div>
