@@ -37,8 +37,12 @@ export async function action({ request }) {
     if (!response.ok) {
       return { errors: resData.detail ? [resData.detail] : ["Unknown error"] };
     }
+    const name = resData.user?.name || "";
+    console.log(name);
 
     localStorage.setItem("token", resData.access_token);
+
+    localStorage.setItem("userName", name);
 
     return redirect("/");
   }

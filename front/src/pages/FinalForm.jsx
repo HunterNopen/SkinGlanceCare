@@ -82,6 +82,19 @@ const FinalForm = () => {
               className="xl:w-full w-[70%] max-w-[600px] h-[50px] border-3 border-[#E8E8E8] 
                 text-[#535353] bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
             />
+            {isLogin ? (
+              <p>
+                Forgot password?{" "}
+                <Link
+                  to="/ForgotPassword"
+                  className="text-[#4DA19F] cursor-pointer"
+                >
+                  Click here
+                </Link>
+              </p>
+            ) : (
+              ""
+            )}
           </div>
 
           <div className="w-full flex 2xl:mt-20 mt-10 justify-center lg:justify-start">

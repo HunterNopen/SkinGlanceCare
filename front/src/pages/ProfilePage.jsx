@@ -16,6 +16,10 @@ const ProfilePage = () => {
     window.location.href = "/auth";
   };
 
+  const handleChange = () => {
+    navigate("/ForgotPassword");
+  };
+
   async function handleConfirmDelete() {
     try {
       await deleteAccount();
@@ -82,6 +86,7 @@ const ProfilePage = () => {
                 <button
                   type="button"
                   className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 rounded-2xl font-semibold mt-2 sm:mt-0"
+                  onClick={handleChange}
                 >
                   Change
                 </button>
@@ -107,10 +112,10 @@ const ProfilePage = () => {
 
           {open && (
             <ConfirmModal
-              title="Usunąć konto?"
-              description="Tej operacji nie można cofnąć."
-              confirmText="Usuń konto"
-              cancelText="Anuluj"
+              title="Delete account?"
+              description="This action cannot be undone."
+              confirmText="Delete account"
+              cancelText="Cancel"
               onCancel={() => setOpen(false)}
               onConfirm={handleConfirmDelete}
             />

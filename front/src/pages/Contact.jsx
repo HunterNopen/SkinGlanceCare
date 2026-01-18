@@ -1,54 +1,104 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Contact = () => {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+
+    try {
+      const res = await fetch("http://localhost:8000/users/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, message }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      setSuccess(true);
+      setEmail("");
+      setMessage("");
+    } catch {
+      alert("Failed to send message");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row p-6 lg:p-10 gap-10">
-      <section className="flex flex-1 flex-col items-center  justify-center text-center ">
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-semibold">
+    <div className="flex flex-col lg:flex-row gap-12 px-6 py-12 lg:px-16 max-w-7xl mx-auto">
+      <section className="flex flex-1 flex-col justify-center text-center lg:text-left">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight">
           Get in touch with us
         </h2>
-        <p className="text-xl sm:text-2xl lg:text-3xl mt-6 lg:mt-10">
-          Have a question? <br />
-          Fill out the form below, and our team will <br /> get back to you as
-          soon as possible.
+
+        <p className="mt-6 text-base sm:text-lg lg:text-xl text-gray-600">
+          Have a question?
+          <br />
+          Fill out the form below and our team will get back to you as soon as
+          possible.
         </p>
       </section>
 
-      <section className="flex flex-1 flex-col items-center lg:items-start justify-center">
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold">
+      <section className="flex flex-1 flex-col justify-center mt-20">
+        <h3 className="text-2xl sm:text-3xl font-semibold mb-8 text-center lg:text-left">
           Contact Us
-        </h1>
+        </h3>
 
-        <form className="flex flex-col w-full max-w-[600px] mt-6 lg:mt-10">
-          <label className="text-lg sm:text-xl mt-6 mb-2" htmlFor="email">
-            Email
-          </label>
-          <input
-            placeholder="email"
-            type="email"
-            name="email"
-            className="w-full h-12 sm:h-14 border border-[#E8E8E8] 
-                       text-[#535353] bg-[#f8f8f8] text-lg sm:text-2xl rounded-2xl font-normal p-3"
-          />
-
-          <label className="text-lg sm:text-xl mt-6 mb-2" htmlFor="help">
-            How can We help You?
-          </label>
-          <textarea
-            placeholder="Enter your message"
-            className="w-full h-40 sm:h-52 border border-[#E8E8E8] 
-                       text-[#535353] bg-[#f8f8f8] text-lg sm:text-2xl rounded-2xl font-normal p-3 resize-none"
-            name="help"
-          />
-
-          <div className="w-full flex justify-center lg:justify-start mt-6 sm:mt-10">
-            <button
-              type="submit"
-              className="flex items-center justify-center text-lg sm:text-xl xl:text-2xl h-12 sm:h-14 w-full sm:w-[40%] bg-linear-to-r from-[#4DA19F] to-[#334F4F] text-white font-semibold rounded-2xl"
-            >
-              Send message
-            </button>
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-xl mx-auto lg:mx-0 space-y-6"
+        >
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm sm:text-base font-medium">
+              Email address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+              className="h-12 sm:h-14 rounded-xl border border-gray-300 bg-gray-50 px-4 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#4DA19F]"
+            />
           </div>
+          <div className="flex flex-col">
+            <label className="mb-2 text-sm sm:text-base font-medium">
+              Your message
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+              rows={5}
+              placeholder="Write your message here..."
+              className="resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#4DA19F]"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`h-12 sm:h-14 w-full sm:w-1/2 rounded-xl text-white font-semibold transition
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#4DA19F] to-[#334F4F] hover:opacity-90"
+              }`}
+          >
+            {loading ? "Sending..." : "Send message"}
+          </button>
+
+          {success && (
+            <p className="text-green-600 text-sm sm:text-base font-medium">
+              Message sent successfully!
+            </p>
+          )}
         </form>
       </section>
     </div>

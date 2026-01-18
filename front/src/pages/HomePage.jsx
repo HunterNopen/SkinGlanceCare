@@ -10,10 +10,10 @@ import { useNavigate } from "react-router-dom";
 const HomePage = () => {
   const navigate = useNavigate();
   const handleMoveToUploadPage = () => navigate("UploadImage");
+  const handleMoveToEducationPage = () => navigate("EducationPage");
 
   return (
     <>
-      {/* Hero Section */}
       <div className="flex flex-col lg:flex-row items-center px-4 lg:px-20 mt-20 gap-10">
         <div className="lg:w-1/2 text-center lg:text-left">
           <h1 className="bg-linear-to-r from-[#4DA19F] to-[#334F4F] bg-clip-text text-transparent text-4xl sm:text-5xl lg:text-6xl font-bold">
@@ -31,7 +31,11 @@ const HomePage = () => {
             >
               Start free analysis
             </button>
-            <button className="w-full sm:w-[260px] h-10 sm:h-12 bg-white rounded-3xl text-xl sm:text-2xl bg-linear-to-r from-[#4DA19F] to-[#334F4F] bg-clip-text text-transparent border-2 border-[#4DA19F]">
+
+            <button
+              onClick={handleMoveToEducationPage}
+              className="w-full sm:w-[260px] h-10 sm:h-12 bg-white rounded-3xl text-xl sm:text-2xl bg-linear-to-r from-[#4DA19F] to-[#334F4F] bg-clip-text text-transparent border-2 border-[#4DA19F]"
+            >
               Learn how it works
             </button>
           </div>
@@ -43,7 +47,6 @@ const HomePage = () => {
         ></div>
       </div>
 
-      {/* Disclaimer */}
       <p className="text-sm sm:text-base text-center text-[rgba(0,0,0,0.55)] px-4 mt-6">
         This AI tool is designed to assist in early detection and should not
         replace professional medical advice. <br />
@@ -51,7 +54,6 @@ const HomePage = () => {
         treatment.
       </p>
 
-      {/* How it works */}
       <div className="flex flex-col items-center mt-12 px-4 lg:px-20">
         <h1 className="bg-linear-to-r from-[#4DA19F] to-[#334F4F] bg-clip-text text-transparent text-3xl sm:text-4xl lg:text-6xl font-bold text-center">
           How it works
@@ -82,15 +84,10 @@ const HomePage = () => {
                 {step === 3 &&
                   "Receive a detailed report with risk assessment and recommended next steps."}
               </p>
-              <div className="absolute bottom-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#334F4F] flex items-center justify-center text-white text-lg sm:text-xl">
-                ✔
-              </div>
             </div>
           ))}
         </div>
       </div>
-
-      {/* Advanced AI section */}
       <div className="flex flex-col lg:flex-row mt-12 px-4 lg:px-20 gap-6">
         <div className="lg:w-1/2 flex flex-col gap-6">
           <div className="flex flex-col gap-6">
@@ -121,7 +118,6 @@ const HomePage = () => {
         ></div>
       </div>
 
-      {/* Call to action */}
       <div className="flex justify-center">
         <div
           className="w-full max-w-[90%] sm:max-w-[70%] min-h-[300px] sm:min-h-[460px] bg-cover m-6 sm:m-10 bg-center flex flex-col items-center justify-center rounded-4xl text-center px-4"

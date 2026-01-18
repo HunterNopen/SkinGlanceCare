@@ -24,9 +24,9 @@ const ErrorPage = () => {
         </h1>
         <p className="text-4xl mt-8">{message}</p>
         <p className="mt-10 text-4xl text-gray-500">
-          Spróbuj wrócić do{" "}
+          Try came back to{" "}
           <a href="/" className="text-blue-500 hover:underline">
-            Strony Głównej
+            Home Page
           </a>
         </p>
       </div>
