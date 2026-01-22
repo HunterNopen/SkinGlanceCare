@@ -1,4 +1,5 @@
 from datetime import timedelta
+import datetime
 import random
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from backend.auth import auth
@@ -41,12 +42,21 @@ router = APIRouter(prefix="/access", tags=["Access"])
 @router.post("/signup/", response_model=schemas.UserOut, status_code=201)
 @limiter.limit("5/minute")
 def create_user(
-    request: Request, user_in: schemas.UserCreate, db: Session = Depends(get_db)
+    request: Request,
+    user_in: schemas.UserCreate,
+    db: Session = Depends(get_db),
 ):
-    existing_user = (
-        db.query(models.User).filter(models.User.email == user_in.email).first()
-    )
+    if not user_in.rodo_accepted:
+        raise HTTPException(
+            status_code=400,
+            detail="RODO consent is required",
+        )
 
+    existing_user = (
+        db.query(models.User)
+        .filter(models.User.email == user_in.email)
+        .first()
+    )
     if existing_user:
         raise HTTPException(400, "Email already registered")
 
@@ -60,6 +70,9 @@ def create_user(
         name=user_in.name,
         verification_code=verification_code,
         is_verified=False,
+
+        rodo_accepted=True,
+        rodo_accepted_at=datetime.utcnow()
     )
 
     db.add(user)
@@ -69,6 +82,7 @@ def create_user(
     send_verification_email(user.email, verification_code)
 
     return user
+
 
 
 @router.post("/login/", response_model=schemas.Token)

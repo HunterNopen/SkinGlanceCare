@@ -31,6 +31,9 @@ class User(Base):
         nullable=False,
     )
 
+    rodo_accepted = Column(Boolean, nullable=False)
+    rodo_accepted_at = Column(DateTime, nullable=False)
+
     images = relationship("Image", back_populates="user", cascade="all, delete-orphan")
 
 
