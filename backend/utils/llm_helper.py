@@ -30,24 +30,23 @@ def _format_confidences(confidences: List[Dict[str, Any]]) -> str:
     return ", ".join(parts)
 
 
-def build_gemini_message(
-    prediction: Dict[str, Any],
-    confidence_score: float,
-    confidence_top3_score: float | None = None,
-) -> str:
-    label = prediction.get("label", "unknown")
-    confidences = prediction.get("confidences", [])
-    top_conf = 0.0
-    if confidences:
-        top_conf = float(confidences[0].get("confidence", 0.0))
-
-    confidences_text = _format_confidences(confidences)
-
-    full_label = CLASS_FULL_NAME.get(label, label)
-
-    top3_conf = (
-        "N/A" if confidence_top3_score is None else f"{confidence_top3_score:.1f}"
-    )
+def build_gemini_message(prediction: Dict[str, Any]) -> str:
+    """
+    Создаёт человекочитаемое сообщение для пользователя
+    на основе нового JSON HuggingFace, без зависимости от старых
+    label/confidences.
+    """
+    predicted_class = prediction.get("predicted_class", "unknown")
+    predicted_class_full = prediction.get("predicted_class_full", predicted_class)
+    predicted_probability = prediction.get("predicted_probability", 0.0)
+    risk_level = prediction.get("risk_level", "UNKNOWN")
+    certainty_score = prediction.get("certainty_score", 0.0)
+    certainty_level = prediction.get("certainty_level", "UNKNOWN")
+    cancer_probability = prediction.get("cancer_probability", None)
+    cancer_certainty = prediction.get("cancer_certainty", None)
+    recommendation = prediction.get("recommendation", "")
+    is_ood = prediction.get("is_ood", False)
+    model_uncertainty = prediction.get("model_uncertainty", None)
 
     system_prompt = (
         "You are a supportive digital assistant helping a person who "
@@ -61,14 +60,14 @@ def build_gemini_message(
     )
 
     user_context = (
-        "The AI model analyzed a photo of a skin lesion. "
-        f"Predicted class (non‑diagnostic label): {full_label} ({label}). "
-        f"Top model probability: {top_conf * 100:.1f}%. "
-        f"Full distribution: {confidences_text}. "
-        f"Heuristic confidence based on full distribution and empirical metrics (0–100): {confidence_score:.1f}. "
-        f"Additional confidence based mainly on the top three classes (0–100): {top3_conf}. "
-        "The classes come from the HAM10000 dataset: a mix of benign "
-        "and malignant skin lesions, plus a 'HEAL' class for healthy skin."
+        f"The AI model analyzed a photo of a skin lesion.\n"
+        f"Predicted class: {predicted_class_full} ({predicted_class})\n"
+        f"Probability: {predicted_probability:.1f}%\n"
+        f"Risk level: {risk_level}\n"
+        f"Model certainty: {certainty_score:.1f} ({certainty_level})\n"
+        f"Cancer probability: {cancer_probability} (certainty: {cancer_certainty})\n"
+        f"Recommendation: {recommendation}\n"
+        f"Out-of-distribution flag: {is_ood}, model uncertainty: {model_uncertainty}"
     )
 
     user_instruction = (
@@ -94,7 +93,6 @@ def build_gemini_message(
         )
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
-
     payload = {
         "contents": [
             {
@@ -107,14 +105,11 @@ def build_gemini_message(
             }
         ]
     }
-
     headers = {"Content-Type": "application/json"}
     params = {"key": GEMINI_API_KEY}
 
     try:
-        response = requests.post(
-            url, headers=headers, params=params, json=payload, timeout=20
-        )
+        response = requests.post(url, headers=headers, params=params, json=payload, timeout=20)
         response.raise_for_status()
         data = response.json()
         candidates = data.get("candidates", [])
@@ -129,23 +124,9 @@ def build_gemini_message(
             raise ValueError("Empty text returned from Gemini")
         return text.strip()
     except Exception as e:
-        # return (
-        #     "The AI has generated an internal summary of your result, but we "
-        #     "couldn’t retrieve the full explanation right now. The most "
-        #     "important next step is to contact a dermatologist or doctor if "
-        #     "you notice any changes or feel worried about this spot."
-        # )
         print("Gemini error:", e)
         if "response" in locals():
             print("Response text:", response.text)
-        #!!!!! uwaga dodałem do return aby symulować wysłanie wiadomości, bo model za dużo przyjmował req i zwracał błąd co działa poprawnie, ale na etap developmentu jest ok, potem przywrócić poprawny mssg błędy np. ERROR
+        # error handling, return a fallback message
         return "Error"
 
-
-#         return """"Thanks for uploading your photo! Our AI tool has looked at it.
-
-# Based on its analysis, the AI's primary suggestion for your lesion is something called a 'vascular lesion.' These are often related to small blood vessels in the skin, and many are harmless.
-
-# However, it's really important to remember that this is just a computer's estimate, not a medical diagnosis. The AI wasn't highly confident in its top suggestion and also considered other possibilities for what your lesion might be, including types that a doctor would want to examine closely. Only a qualified doctor, like a dermatologist, can truly tell you what your lesion is.
-
-# We strongly recommend showing this lesion to a dermatologist or your doctor for a proper check-up. This is especially important if you've noticed it changing, growing, causing discomfort, or if you're feeling worried about it. Keeping clear, well-lit photos like the one you uploaded can also be very helpful to show your doctor and track any changes over time. Your peace of mind is important!"""
