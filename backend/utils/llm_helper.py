@@ -31,11 +31,7 @@ def _format_confidences(confidences: List[Dict[str, Any]]) -> str:
 
 
 def build_gemini_message(prediction: Dict[str, Any]) -> str:
-    """
-    Создаёт человекочитаемое сообщение для пользователя
-    на основе нового JSON HuggingFace, без зависимости от старых
-    label/confidences.
-    """
+
     predicted_class = prediction.get("predicted_class", "unknown")
     predicted_class_full = prediction.get("predicted_class_full", predicted_class)
     predicted_probability = prediction.get("predicted_probability", 0.0)
