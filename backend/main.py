@@ -44,6 +44,7 @@ app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
+    "https://skinglancecare-front.onrender.com",
 ]
 
 app.add_middleware(
