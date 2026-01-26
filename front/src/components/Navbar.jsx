@@ -1,17 +1,27 @@
+import { Link, useNavigate } from "react-router-dom";
 import { MdClose, MdMenu } from "react-icons/md";
 
-import { Link } from "react-router-dom";
 import React from "react";
 import logo from "../assets/img/logo.png";
 
 const Navbar = () => {
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+  const isLoggedIn = Boolean(token);
 
   const navLinks = [
     { name: "Skin examination", to: "/UploadImage" },
     { name: "History", to: "/HistoryPage" },
     { name: "Profile", to: "/ProfilePage" },
+    { name: "Education", to: "/EducationPage" },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/FinalForm?mode=login");
+  };
 
   return (
     <nav className="w-full bg-white fixed z-50 shadow-sm">
@@ -23,7 +33,6 @@ const Navbar = () => {
               SkinGlanceCare
             </span>
           </Link>
-
           <div className="hidden md:flex md:items-center md:gap-10">
             {navLinks.map((link) => (
               <Link
@@ -35,15 +44,22 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
-
           <div className="hidden md:flex">
-            <Link to="/FinalForm?mode=login">
-              <button className="bg-[#334F4F] text-white px-5 py-2 rounded-2xl text-lg hover:bg-[#2a3f41] transition-colors">
-                Get Started
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="bg-[#334F4F] text-white px-5 py-2 rounded-2xl text-lg hover:bg-[#2a3f41] transition-colors"
+              >
+                Logout
               </button>
-            </Link>
+            ) : (
+              <Link to="/FinalForm?mode=login">
+                <button className="bg-[#334F4F] text-white px-5 py-2 rounded-2xl text-lg hover:bg-[#2a3f41] transition-colors">
+                  Get Started
+                </button>
+              </Link>
+            )}
           </div>
-
           <div className="md:hidden flex items-center">
             <button onClick={() => setOpen(!open)}>
               {open ? (
@@ -55,7 +71,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-
       {open && (
         <div className="md:hidden bg-white shadow-lg absolute w-full top-[100px] left-0 z-40">
           <ul className="flex flex-col items-center py-4 space-y-4">
@@ -70,12 +85,27 @@ const Navbar = () => {
                 </Link>
               </li>
             ))}
+
             <li>
-              <Link to="/FinalForm?mode=login" onClick={() => setOpen(false)}>
-                <button className="bg-[#334F4F] text-white px-5 py-2 rounded-2xl text-lg hover:bg-[#2a3f41] transition-colors">
-                  Get Started
+              {isLoggedIn ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setOpen(false);
+                  }}
+                  className="bg-[#334F4F] text-white px-5 py-2 rounded-2xl text-lg hover:bg-[#2a3f41] transition-colors"
+                >
+                  Logout
                 </button>
-              </Link>
+              ) : (
+                <Link
+                  to="/FinalForm?mode=login"
+                  onClick={() => setOpen(false)}
+                  className="bg-[#334F4F] text-white px-5 py-2 rounded-2xl text-lg hover:bg-[#2a3f41] transition-colors"
+                >
+                  Get Started
+                </Link>
+              )}
             </li>
           </ul>
         </div>

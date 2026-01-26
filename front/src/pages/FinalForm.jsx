@@ -3,12 +3,13 @@ import { Form, Link, useNavigation, useSearchParams } from "react-router-dom";
 import React from "react";
 import bodyImg2 from "../assets/img/back.png";
 import { useActionData } from "react-router-dom";
+import { useState } from "react";
 
 const FinalForm = () => {
   const data = useActionData();
   const navigation = useNavigation();
   const isSubmiting = navigation.state === "submitting";
-
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [searchParams] = useSearchParams();
   const isLogin = searchParams.get("mode") === "login";
 
@@ -79,19 +80,68 @@ const FinalForm = () => {
               type="password"
               id="password"
               name="password"
-              className="xl:w-full w-[70%] max-w-[600px] h-[50px] border-3 border-[#E8E8E8] 
+              className="xl:w-full w-[70%] xl:max-w-[278px] h-[50px] border-3 border-[#E8E8E8] 
                 text-[#535353] bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
             />
+            {isLogin ? (
+              <p>
+                Forgot password?{" "}
+                <Link
+                  to="/ForgotPassword"
+                  className="text-[#4DA19F] cursor-pointer"
+                >
+                  Click here
+                </Link>
+              </p>
+            ) : (
+              ""
+            )}
           </div>
+
+          {!isLogin && (
+            <div className="mt-6 flex items-start gap-3 max-w-[600px]">
+              <input
+                type="checkbox"
+                id="accept_policy"
+                name="accept_policy"
+                required
+                checked={acceptedPolicy}
+                onChange={(e) => setAcceptedPolicy(e.target.checked)}
+                className="mt-1 h-5 w-5 accent-[#4DA19F] cursor-pointer"
+              />
+
+              <label
+                htmlFor="accept_policy"
+                className="text-sm xl:text-base text-gray-600"
+              >
+                I agree to the{" "}
+                <Link
+                  to="/policy"
+                  className="text-[#4DA19F] underline hover:text-[#334F4F]"
+                  target="_blank"
+                >
+                  Terms of Service & Privacy Policy
+                </Link>
+              </label>
+            </div>
+          )}
 
           <div className="w-full flex 2xl:mt-20 mt-10 justify-center lg:justify-start">
             <button
-              disabled={isSubmiting}
-              className="flex xl:text-2xl text-xl items-center justify-center h-[50px] w-[30%] p-0 
-                bg-linear-to-r from-[#4DA19F] to-[#334F4F] text-white font-semibold rounded-2xl"
+              disabled={isSubmiting || (!isLogin && !acceptedPolicy)}
+              className={`flex xl:text-2xl text-xl items-center justify-center h-[50px] w-[30%]
+    font-semibold rounded-2xl transition
+    ${
+      isSubmiting || (!isLogin && !acceptedPolicy)
+        ? "bg-[#839b9b] cursor-not-allowed text-gray-600"
+        : "bg-linear-to-r from-[#4DA19F] to-[#334F4F] text-white"
+    }`}
             >
-              {isSubmiting ? "Submiting..." : ""}
-              {isLogin ? "Log in" : "Get started"}
+              {isSubmiting
+                ? "Submitting..."
+                : isLogin
+                  ? "Log in"
+                  : "Get started"}
             </button>
           </div>
 
@@ -123,7 +173,7 @@ const FinalForm = () => {
         <div className="lg:flex hidden w-[40%] justify-center items-center overflow-hidden m-5 ">
           <img
             src={bodyImg2}
-            className="w-full h-[80%]  rounded-2xl"
+            className="w-full h-[70%]  rounded-2xl"
             alt="background"
           />
         </div>

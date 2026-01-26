@@ -62,7 +62,7 @@ def send_contact_email(from_email: str, message: str):
     """
 
     return send_via_brevo_api(
-        to_email=MAIL_FROM,  # mail firmowy / Twój
+        to_email=MAIL_FROM,  
         subject=subject,
         html_content=body,
     )

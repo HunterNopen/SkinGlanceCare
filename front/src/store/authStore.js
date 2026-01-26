@@ -1,6 +1,8 @@
 import axios from "axios";
 import { create } from "zustand";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export const useAuthStore = create((set) => ({
   user: null,
   isAuthenticated: false,
@@ -11,10 +13,10 @@ export const useAuthStore = create((set) => ({
   verifyEmail: async (code, email) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.post(
-        `http://localhost:8000/access/verify_email/`,
-        { code, email }
-      );
+      const response = await axios.post(`${BASE_URL}/access/verify_email/`, {
+        code,
+        email,
+      });
       set({
         user: response.data.user,
         isAuthenticated: true,
@@ -33,10 +35,9 @@ export const useAuthStore = create((set) => ({
     set({ resending: true, error: null });
     try {
       console.log(email);
-      await axios.post(
-        "http://localhost:8000/access/resend_verification_email/",
-        { email }
-      );
+      await axios.post(`${BASE_URL}/access/resend_verification_email/`, {
+        email,
+      });
       // toast.success("New verification code sent to your email");
     } catch (err) {
       set({
@@ -48,6 +49,50 @@ export const useAuthStore = create((set) => ({
       // );
     } finally {
       set({ resending: false });
+    }
+  },
+  forgotPassword: async (email) => {
+    set({ isLoading: true, error: null, message: null });
+    try {
+      console.log("FORGOT PASSWORD EMAIL:", email);
+      const response = await axios.post(`${BASE_URL}/access/forgot-password`, {
+        email,
+      });
+
+      set({
+        message: response.data.message,
+        isLoading: false,
+      });
+
+      return response.data;
+    } catch (error) {
+      set({
+        isLoading: false,
+        error:
+          error.response?.data?.detail || "Error sending reset password email",
+      });
+      throw error;
+    }
+  },
+  resetPassword: async (token, password) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axios.post(`${BASE_URL}/access/reset-password`, {
+        token,
+        new_password: password,
+      });
+
+      set({ message: response.data.message, isLoading: false });
+    } catch (error) {
+      const detail = error.response?.data?.detail;
+
+      set({
+        isLoading: false,
+        error: Array.isArray(detail)
+          ? detail[0]?.msg
+          : detail || "Error resetting password",
+      });
+      throw error;
     }
   },
 }));

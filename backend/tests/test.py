@@ -1,9 +1,9 @@
 import requests
 
-GRADIO_URL = "http://localhost:7860"  # Twój URL Gradio
-API_NAME = "/predict_openvino"  # endpoint OpenVINO
+GRADIO_URL = "http://localhost:7860"  
+API_NAME = "/predict_openvino"  
 
-file_path = "test.jpg"  # jakiś mały obraz do testu
+file_path = "test.jpg"  
 
 with open(file_path, "rb") as f:
     files = {"image": f}

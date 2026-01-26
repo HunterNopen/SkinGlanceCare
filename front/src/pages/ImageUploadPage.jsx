@@ -132,7 +132,23 @@ const ImageUploadPage = () => {
         </button>
       )}
 
-      {uploadResult && <Result analysis={uploadResult} />}
+      {uploadResult && (
+        <Result
+          analysis={{
+            image_id: uploadResult.image_id,
+            filename: uploadResult.filename || null,
+            predicted_class: uploadResult.result.predicted_class,
+            predicted_class_full: uploadResult.result.predicted_class_full,
+            predicted_probability: uploadResult.result.predicted_probability,
+            confidence_score: uploadResult.result.certainty_score,
+            confidence_top3_score: null,
+            cancer_probability: uploadResult.result.cancer_probability,
+            risk_level: uploadResult.result.risk_level,
+            recommendation: uploadResult.result.recommendation,
+            llm_message: uploadResult.result.llm_message,
+          }}
+        />
+      )}
 
       {error && (
         <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-red-100 text-red-700 rounded text-center">

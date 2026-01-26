@@ -4,6 +4,7 @@ from typing import Optional, List
 import datetime
 from backend.db.models import GenderEnum
 from pydantic import Field
+from typing import Any, Dict
 
 
 class UserBase(BaseModel):
@@ -13,6 +14,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: constr(min_length=6)
+    rodo_accepted: bool
+    
 
 
 class UserLogin(BaseModel):
@@ -58,12 +61,7 @@ class ImagePredictionConfidence(BaseModel):
 
 class ImageAnalysisResponse(BaseModel):
     image_id: int
-    predicted_class: str
-    predicted_class_full: str
-    predicted_probability: float
-    confidence_score: float
-    confidence_top3_score: float
-    confidences: List[ImagePredictionConfidence]
+    result: Dict[str, Any]
 
 
 class LLMMessageResponse(BaseModel):
