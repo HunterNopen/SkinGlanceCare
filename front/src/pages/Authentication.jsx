@@ -9,6 +9,7 @@ function Authentication() {
 export default Authentication;
 
 export async function action({ request }) {
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const searchParams = new URL(request.url).searchParams;
   const mode = searchParams.get("mode") || "login";
 
@@ -26,7 +27,7 @@ export async function action({ request }) {
     formData.append("username", data.get("email"));
     formData.append("password", data.get("password"));
 
-    const response = await fetch(`http://localhost:8000/access/login/`, {
+    const response = await fetch(`${BASE_URL}/access/login/`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString(),
@@ -55,7 +56,7 @@ export async function action({ request }) {
       rodo_accepted: data.get("accept_policy") === "on",
     };
 
-    const response = await fetch(`http://localhost:8000/access/signup/`, {
+    const response = await fetch(`${BASE_URL}/access/signup/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(authData),

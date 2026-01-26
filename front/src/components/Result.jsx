@@ -40,7 +40,7 @@ const Result = ({ analysis }) => {
       setLoadingLlm(true);
       setLlmMessage("");
 
-      fetch(`http://localhost:8000/images/${image_id}/llm_message`, {
+      fetch(`${import.meta.env.VITE_BASE_URL}/images/${image_id}/llm_message`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

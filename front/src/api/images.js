@@ -1,6 +1,5 @@
 import { fetchWithAuth } from "./api";
 
-// Pobieranie wszystkich obrazów (bez paginacji)
 export async function getImages() {
   const res = await fetchWithAuth("/images");
   if (!res.ok) throw new Error("Failed to fetch images");
@@ -21,7 +20,6 @@ export async function deleteImage(id) {
   return true;
 }
 
-// ---------------- Paginacja ----------------
 export async function getImagesHistory(skip = 0, limit = 8) {
   const res = await fetchWithAuth(`/users/history?skip=${skip}&limit=${limit}`);
 
@@ -30,5 +28,5 @@ export async function getImagesHistory(skip = 0, limit = 8) {
     throw new Error(err.detail ? JSON.stringify(err.detail) : "Unknown error");
   }
 
-  return res.json(); // zwraca listę obrazów
+  return res.json();
 }

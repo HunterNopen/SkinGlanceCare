@@ -1,6 +1,6 @@
 import { getToken } from "../util/auth.js";
 
-const API_URL = "http://localhost:8000/images";
+const API_URL = `${import.meta.env.VITE_BASE_URL}/images`;
 const token = getToken();
 export async function uploadImage(file, token) {
   if (!file) throw new Error("No file provided");

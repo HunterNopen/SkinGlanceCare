@@ -31,7 +31,7 @@ const Result = ({ analysis }) => {
   } = analysis;
 
   const imageUrl = filename
-    ? `http://localhost:8000/uploads/${filename}`
+    ? `${import.meta.env.VITE_BASE_URL}/uploads/${filename}`
     : null;
 
   const safePercent = (v) => (typeof v === "number" ? `${v.toFixed(1)}%` : "–");

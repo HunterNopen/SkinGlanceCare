@@ -9,30 +9,18 @@ const parseImageResult = (image) => {
 
   return {
     ...image,
-
-    // predicted
     predicted_class: resultData.predicted_class || "?",
     predicted_class_full:
       resultData.predicted_class_full ||
       resultData.predicted_class ||
       "Unknown",
-
-    // probabilities
     predicted_probability: resultData.predicted_probability || 0,
     cancer_probability: resultData.cancer_probability || 0,
-
-    // confidence
     confidence_score: resultData.certainty_score || 0,
     confidence_top3_score: resultData.confidence_top3_score || 0,
-
-    // risk
     risk_level: resultData.risk_level || "UNKNOWN",
     recommendation: resultData.recommendation || "",
-
-    // LLM
     llm_message: resultData.llm_message || "",
-
-    // original result
     raw_result: resultData,
   };
 };
@@ -123,7 +111,7 @@ const HistoryPage = () => {
 
             {img.filename && (
               <img
-                src={`http://localhost:8000/uploads/${img.filename}`}
+                src={`${import.meta.env.VITE_BASE_URL}/uploads/${img.filename}`}
                 alt={img.filename}
                 className="w-[90%] h-48 object-cover shadow-md rounded-xl"
               />

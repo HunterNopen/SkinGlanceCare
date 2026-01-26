@@ -145,7 +145,7 @@ const ImageUploadPage = () => {
             cancer_probability: uploadResult.result.cancer_probability,
             risk_level: uploadResult.result.risk_level,
             recommendation: uploadResult.result.recommendation,
-            llm_message: uploadResult.result.llm_message, // jeśli masz w response
+            llm_message: uploadResult.result.llm_message,
           }}
         />
       )}
