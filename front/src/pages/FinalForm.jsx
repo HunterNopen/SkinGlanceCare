@@ -116,7 +116,7 @@ const FinalForm = () => {
               >
                 I agree to the{" "}
                 <Link
-                  to="/policy"
+                  to="/PolicyPage"
                   className="text-[#4DA19F] underline hover:text-[#334F4F]"
                   target="_blank"
                 >
