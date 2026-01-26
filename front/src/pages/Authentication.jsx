@@ -52,6 +52,7 @@ export async function action({ request }) {
       email: data.get("email"),
       password: data.get("password"),
       name: data.get("first_name"),
+      rodo_accepted: data.get("accept_policy") === "on",
     };
 
     const response = await fetch(`http://localhost:8000/access/signup/`, {

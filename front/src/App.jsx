@@ -11,11 +11,11 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import HistoryPage from "./pages/HistoryPage";
 import HomePage from "./pages/HomePage";
 import ImageUploadPage from "./pages/ImageUploadPage";
+import PolicyPage from "./pages/PolicyPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RootLayout from "./pages/RootLayout";
-import SignUpPage from "./pages/SignUpPage";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +33,7 @@ const router = createBrowserRouter([
       { path: "ForgotPassword", element: <ForgotPasswordPage /> },
       { path: "ResetPassword", element: <ResetPasswordPage /> },
       { path: "EducationPage", element: <EducationPage /> },
+      { path: "PolicyPage", element: <PolicyPage /> },
 
       // protected routes
       {

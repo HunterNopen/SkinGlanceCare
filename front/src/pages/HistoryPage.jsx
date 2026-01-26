@@ -6,16 +6,34 @@ import ResultModal from "../components/ResultModal";
 
 const parseImageResult = (image) => {
   const resultData = image.result ? JSON.parse(image.result) : {};
+
   return {
     ...image,
-    predicted_class: resultData.label || "?",
+
+    // predicted
+    predicted_class: resultData.predicted_class || "?",
     predicted_class_full:
-      resultData.predicted_class_full || resultData.label || "?",
-    predicted_probability: resultData.confidences?.[0]?.confidence || 0,
-    confidences: resultData.confidences || [],
-    confidence_score: resultData.confidence_score || 0,
+      resultData.predicted_class_full ||
+      resultData.predicted_class ||
+      "Unknown",
+
+    // probabilities
+    predicted_probability: resultData.predicted_probability || 0,
+    cancer_probability: resultData.cancer_probability || 0,
+
+    // confidence
+    confidence_score: resultData.certainty_score || 0,
     confidence_top3_score: resultData.confidence_top3_score || 0,
+
+    // risk
+    risk_level: resultData.risk_level || "UNKNOWN",
+    recommendation: resultData.recommendation || "",
+
+    // LLM
     llm_message: resultData.llm_message || "",
+
+    // original result
+    raw_result: resultData,
   };
 };
 
@@ -24,28 +42,20 @@ const HistoryPage = () => {
   const [page, setPage] = useState(0);
   const [limit] = useState(8);
   const [hasMore, setHasMore] = useState(true);
+
   const [analysis, setAnalysis] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
 
   const loadImages = async (pageNum = 0) => {
     const data = await getImagesHistory(pageNum * limit, limit);
 
-    console.log(
-      "PAGE:",
-      pageNum,
-      "IDS:",
-      data.map((d) => d.id),
-    );
-
     const parsed = data.map(parseImageResult);
 
-    if (pageNum === 0) {
-      setImages(parsed);
-    } else {
-      setImages((prev) => [...prev, ...parsed]);
-    }
+    if (pageNum === 0) setImages(parsed);
+    else setImages((prev) => [...prev, ...parsed]);
 
     setHasMore(data.length === limit);
   };
@@ -110,6 +120,7 @@ const HistoryPage = () => {
             <h3 className="text-[#334F4F] text-2xl font-semibold">
               {img.predicted_class_full}
             </h3>
+
             {img.filename && (
               <img
                 src={`http://localhost:8000/uploads/${img.filename}`}
@@ -117,6 +128,7 @@ const HistoryPage = () => {
                 className="w-[90%] h-48 object-cover shadow-md rounded-xl"
               />
             )}
+
             <div className="flex gap-2 items-center">
               <LuCalendar className="text-2xl text-[#4DA19F]" />
               <h4 className="text-xl font-semibold">
@@ -150,6 +162,7 @@ const HistoryPage = () => {
             >
               ✕
             </button>
+
             <ResultModal analysis={analysis} />
           </div>
         </div>

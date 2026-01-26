@@ -23,6 +23,7 @@ router = APIRouter(prefix="/images", tags=["Images"])
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 def get_gradio_client():
     return Client(GRADIO_URL)
 
@@ -56,7 +57,11 @@ def upload_image(
     current_user: models.User = Depends(get_current_user),
 ):
     validate_image(file)
+
+    file.file.seek(0)
+
     clear_metadata(file)
+    file.file.seek(0)
 
     filename = f"{current_user.id}_{file.filename}"
     file_path = os.path.join(UPLOAD_DIR, filename)
@@ -116,7 +121,6 @@ def upload_image(
     )
 
 
-
 @router.get("/{image_id}/llm_message", response_model=schemas.LLMMessageResponse)
 def get_llm_message(
     image_id: int,
@@ -140,10 +144,10 @@ def get_llm_message(
     label = result.get("label")
 
     confidences = result.get("confidences", [])
-    confidence_score = _compute_confidence_score(confidences, label)
-    confidence_top3_score = _compute_top3_confidence(confidences)
+    # confidence_score = _compute_confidence_score(confidences, label)
+    # confidence_top3_score = _compute_top3_confidence(confidences)
 
-    llm_message = build_gemini_message(result, confidence_score, confidence_top3_score)
+    llm_message = build_gemini_message(result)
 
     result["llm_message"] = llm_message
 

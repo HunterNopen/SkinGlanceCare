@@ -16,6 +16,11 @@ const Footer = () => {
               About Us
             </Link>
           </li>
+          <li className="my-2">
+            <Link to="/PolicyPage" className="hover:underline">
+              Policy
+            </Link>
+          </li>
           {/* <li className="my-2">
             <Link to="/privacy" className="hover:underline">
               Privacy Policy
