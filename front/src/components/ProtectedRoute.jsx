@@ -6,7 +6,7 @@ const ProtectedRoute = () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    toast.info("Musisz się zalogować, aby wejść na tę stronę", {
+    toast.info("Please log in to view this page", {
       toastId: "login-required",
     });
     return <Navigate to="/auth?mode=login" replace />;
