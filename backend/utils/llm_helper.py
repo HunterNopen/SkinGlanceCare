@@ -67,15 +67,15 @@ def build_gemini_message(prediction: Dict[str, Any]) -> str:
     )
 
     user_instruction = (
-        "Based on this non‑diagnostic AI output, write a short message "
-        "(120–220 words) directly to the user that:\n"
+        "Based on this non-diagnostic AI output, write a short message "
+        "(120-220 words) directly to the user that:\n"
         "- Explains in everyday language what this result suggests.\n"
         "- Stresses that this is only a computer estimate, not a medical diagnosis.\n"
         "- Encourages them to see a dermatologist, especially if the lesion is new, changing, painful, or worrying.\n"
         "- If the probability is high, be clear but calm; avoid scary wording.\n"
         "- If the probability is moderate or low, explain uncertainty and still "
         "recommend monitoring and professional advice.\n"
-        "- Suggest taking or keeping clear, well‑lit photos to show to a doctor.\n"
+        "- Suggest taking or keeping clear, well-lit photos to show to a doctor.\n"
         "Do NOT mention model names, probabilities, or internal technical details. "
         "Focus only on what the user should understand and consider doing next."
     )
