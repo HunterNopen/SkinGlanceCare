@@ -14,14 +14,14 @@ const FinalForm = () => {
   const isLogin = searchParams.get("mode") === "login";
 
   return (
-    <main className="flex items-center justify-center bg-[#ABD3D2] w-full h-screen px-[5%] xl:px-[10%]">
-      <section className="w-full mx-auto h-[85%] bg-white flex flex-row px-[5%] 2xl:px-[10%]">
+    <main className="flex items-center xl:justify-center bg-[#ABD3D2] w-full h-screen  px-[5%] xl:px-[10%]">
+      <section className="w-full mx-auto xl:h-[85%] h-[85%] bg-white flex flex-row px-[5%] 2xl:px-[10%]">
         <Form
           method="post"
           action={`/auth?mode=${isLogin ? "login" : "add_user"}`}
           className="lg:w-[60%] w-full flex flex-col justify-center items-center lg:items-stretch 2xl:py-20"
         >
-          <h1 className="2xl:text-5xl text-5xl font-semibold 2xl:my-20 my-10 capitalize">
+          <h1 className="2xl:text-5xl text-3xl font-semibold 2xl:my-20 my-10 capitalize">
             {data && data.errors && (
               <ul>
                 {Object.values(data.errors).map((err) => (
@@ -38,7 +38,7 @@ const FinalForm = () => {
               <div className="flex flex-col items-center lg:items-stretch 2xl:mt-0 xl:mt-5">
                 <label
                   htmlFor="name"
-                  className="block text-3xl text-gray-700 mb-2"
+                  className="block xl:text-3xl text-2xl text-gray-700 mb-2"
                 >
                   Name
                 </label>
@@ -46,8 +46,8 @@ const FinalForm = () => {
                   type="text"
                   id="name"
                   name="first_name"
-                  className="xl:w-full w-[70%] h-[50px] border-3 border-[#E8E8E8] 
-                    text-[#535353] bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
+                  className="xl:w-full w-[70%] xl:h-12.5  h:[30px] border-3 border-[#E8E8E8] 
+                    text-[#535353] bg-[#f8f8f8]  xl:text-2xl  text-xl rounded-2xl font-normal"
                 />
               </div>
             )}
@@ -55,7 +55,7 @@ const FinalForm = () => {
             <div className="flex flex-col items-center lg:items-stretch 2xl:mt-0 xl:mt-5 mt-5 ">
               <label
                 htmlFor="email"
-                className="block text-3xl text-gray-700 mb-2"
+                className="block xl:text-3xl text-2xl text-gray-700 mb-2"
               >
                 Email
               </label>
@@ -64,8 +64,8 @@ const FinalForm = () => {
                 id="email"
                 data-testid="login-email"
                 name="email"
-                className="xl:w-full w-[70%] h-[50px] border-3 border-[#E8E8E8] 
-                  text-[#53553 bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
+                className="xl:w-full w-[70%] xl:h-12.5  h:[30px] border-3 border-[#E8E8E8] 
+                  text-[#535353] bg-[#f8f8f8] xl:text-2xl  text-xl rounded-2xl font-normal"
               />
             </div>
           </div>
@@ -73,7 +73,7 @@ const FinalForm = () => {
           <div className="flex flex-col items-center lg:items-stretch 2xl:mt-10 xl:mt-5 mt-5 w-full">
             <label
               htmlFor="password"
-              className="block text-3xl text-gray-700 mb-2"
+              className="block xl:text-3xl text-2xl text-gray-700 mb-2"
             >
               Password
             </label>
@@ -82,7 +82,7 @@ const FinalForm = () => {
               id="password"
               data-testid="login-password"
               name="password"
-              className="xl:w-full w-[70%] xl:max-w-[278px] h-[50px] border-3 border-[#E8E8E8] 
+              className="xl:w-full w-[70%] xl:max-w-[278px] xl:h-12.5  h:[30px] border-3 border-[#E8E8E8] 
                 text-[#535353] bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
             />
             {isLogin ? (
@@ -132,7 +132,7 @@ const FinalForm = () => {
             <button
               data-testid="login-submit"
               disabled={isSubmiting || (!isLogin && !acceptedPolicy)}
-              className={`flex xl:text-2xl text-xl items-center justify-center h-[50px] w-[30%]
+              className={`flex xl:text-2xl text-xl items-center justify-center xl:h-[50px] h-[35px] w-[40%]
     font-semibold rounded-2xl transition
     ${
       isSubmiting || (!isLogin && !acceptedPolicy)
@@ -148,7 +148,7 @@ const FinalForm = () => {
             </button>
           </div>
 
-          <p className="2xl:mt-15 mt-5">
+          <p className="2xl:mt-15 mt-5 pb-5">
             {isLogin ? (
               <>
                 Don’t have an account?{" "}
