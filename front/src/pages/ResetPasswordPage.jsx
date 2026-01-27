@@ -17,7 +17,6 @@ const ResetPasswordPage = () => {
   const token = searchParams.get("token");
   const navigate = useNavigate();
 
-  // Funkcja walidacji hasła
   const validatePassword = (pwd) => {
     const errors = [];
     if (pwd.length < 8) errors.push("Password must be at least 8 characters");
@@ -27,7 +26,6 @@ const ResetPasswordPage = () => {
     setPasswordErrors(errors);
   };
 
-  // Walidacja na bieżąco
   useEffect(() => {
     validatePassword(password);
   }, [password]);

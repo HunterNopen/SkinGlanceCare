@@ -33,7 +33,6 @@ const FinalForm = () => {
   useEffect(() => {
     if (!data) return;
 
-    // Obsługa message z backendu
     if (data.message) {
       toast.error(data.message, {
         style: { background: "#334F4F", color: "#fff", fontWeight: "bold" },
@@ -41,11 +40,9 @@ const FinalForm = () => {
       });
     }
 
-    // Obsługa błędów walidacji
     if (data.errors) {
       const errors = data.errors;
 
-      // Jeśli errors jest tablicą
       if (Array.isArray(errors)) {
         errors.forEach((err) => {
           const msg = err.msg || JSON.stringify(err) || "Unknown error";
@@ -54,9 +51,7 @@ const FinalForm = () => {
             duration: 5000,
           });
         });
-      }
-      // Jeśli errors jest obiektem { field: [...] }
-      else if (typeof errors === "object") {
+      } else if (typeof errors === "object") {
         Object.entries(errors).forEach(([field, errArr]) => {
           const arr = Array.isArray(errArr) ? errArr : [errArr];
           arr.forEach((err) => {
@@ -76,9 +71,7 @@ const FinalForm = () => {
             });
           });
         });
-      }
-      // Inny typ (string, liczba etc)
-      else {
+      } else {
         toast.error(String(errors), {
           style: { background: "#334F4F", color: "#fff", fontWeight: "bold" },
           duration: 5000,
@@ -90,7 +83,6 @@ const FinalForm = () => {
   return (
     <>
       <Toaster position="top-center" />
-
       <main className="flex items-center xl:justify-center bg-[#ABD3D2] w-full h-screen px-[5%] xl:px-[10%]">
         <section className="w-full mx-auto xl:h-[90%] h-[95%] bg-white flex flex-row px-[5%] 2xl:px-[10%]">
           <Form
