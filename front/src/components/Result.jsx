@@ -67,7 +67,10 @@ const Result = ({ analysis }) => {
 
   return (
     <div className="mt-12 w-full max-w-4xl mx-auto bg-white shadow-md rounded-3xl p-10">
-      <h2 className="text-3xl font-semibold text-[#334F4F] mb-6 text-center">
+      <h2
+        data-testid="analysis-result-title"
+        className="text-3xl font-semibold text-[#334F4F] mb-6 text-center"
+      >
         Analysis Result
       </h2>
       <div className="flex justify-center gap-6 mb-10">
@@ -109,6 +112,7 @@ const Result = ({ analysis }) => {
           </div>
 
           <div
+            data-testid="risk-level"
             className={`px-6 py-2 rounded-full font-semibold ${
               riskColors[risk_level] || riskColors.UNKNOWN
             }`}

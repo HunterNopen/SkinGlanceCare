@@ -62,6 +62,7 @@ const FinalForm = () => {
               <input
                 type="email"
                 id="email"
+                data-testid="login-email"
                 name="email"
                 className="xl:w-full w-[70%] h-[50px] border-3 border-[#E8E8E8] 
                   text-[#53553 bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
@@ -79,6 +80,7 @@ const FinalForm = () => {
             <input
               type="password"
               id="password"
+              data-testid="login-password"
               name="password"
               className="xl:w-full w-[70%] xl:max-w-[278px] h-[50px] border-3 border-[#E8E8E8] 
                 text-[#535353] bg-[#f8f8f8] text-2xl rounded-2xl font-normal"
@@ -128,6 +130,7 @@ const FinalForm = () => {
 
           <div className="w-full flex 2xl:mt-20 mt-10 justify-center lg:justify-start">
             <button
+              data-testid="login-submit"
               disabled={isSubmiting || (!isLogin && !acceptedPolicy)}
               className={`flex xl:text-2xl text-xl items-center justify-center h-[50px] w-[30%]
     font-semibold rounded-2xl transition

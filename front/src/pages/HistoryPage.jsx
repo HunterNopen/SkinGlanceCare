@@ -30,10 +30,8 @@ const HistoryPage = () => {
   const [page, setPage] = useState(0);
   const [limit] = useState(8);
   const [hasMore, setHasMore] = useState(true);
-
   const [analysis, setAnalysis] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
 
@@ -109,13 +107,15 @@ const HistoryPage = () => {
               {img.predicted_class_full}
             </h3>
 
-            {img.filename && (
-              <img
-                src={`${import.meta.env.VITE_BASE_URL}/uploads/${img.filename}`}
-                alt={img.filename}
-                className="w-[90%] h-48 object-cover shadow-md rounded-xl"
-              />
-            )}
+            {img.filename &&
+              (console.log(img.filename),
+              (
+                <img
+                  src={`${import.meta.env.VITE_BASE_URL}/uploads/${img.filename}`}
+                  alt={img.filename}
+                  className="w-[90%] h-48 object-cover shadow-md rounded-xl"
+                />
+              ))}
 
             <div className="flex gap-2 items-center">
               <LuCalendar className="text-2xl text-[#4DA19F]" />

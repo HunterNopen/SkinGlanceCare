@@ -88,6 +88,7 @@ const ImageUploadPage = () => {
               or click to browse your files
             </p>
             <input
+              data-testid="file-input"
               type="file"
               accept="image/*"
               ref={fileInputRef}
@@ -124,6 +125,7 @@ const ImageUploadPage = () => {
 
       {image && (
         <button
+          data-testid="start-analysis"
           onClick={handleStartAnalysis}
           disabled={uploading}
           className="mt-6 sm:mt-10 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#4DA19F] to-[#334F4F] text-white font-semibold rounded-2xl text-base sm:text-lg shadow-md"
