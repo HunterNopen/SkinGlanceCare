@@ -1,6 +1,6 @@
 import { ArrowLeft, Loader, Lock } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -9,20 +9,39 @@ import { useAuthStore } from "../store/authStore";
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordErrors, setPasswordErrors] = useState([]);
 
   const { resetPassword, error, isLoading, message } = useAuthStore();
 
   const [searchParams] = useSearchParams();
-
   const token = searchParams.get("token");
-  console.log(token);
   const navigate = useNavigate();
+
+  // Funkcja walidacji hasła
+  const validatePassword = (pwd) => {
+    const errors = [];
+    if (pwd.length < 8) errors.push("Password must be at least 8 characters");
+    if (!/[A-Z]/.test(pwd))
+      errors.push("Password must contain an uppercase letter");
+    if (!/[0-9]/.test(pwd)) errors.push("Password must contain a number");
+    setPasswordErrors(errors);
+  };
+
+  // Walidacja na bieżąco
+  useEffect(() => {
+    validatePassword(password);
+  }, [password]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
+      return;
+    }
+
+    if (passwordErrors.length > 0) {
+      toast.error("Password does not meet requirements");
       return;
     }
 
@@ -80,6 +99,14 @@ const ResetPasswordPage = () => {
                 className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-[#4DA19F] bg-[#f8f8f8] focus:outline-none focus:ring-2 focus:ring-[#4DA19F]"
               />
             </div>
+
+            {passwordErrors.length > 0 && (
+              <ul className="text-[#333333] mt-2 list-disc list-inside text-sm">
+                {passwordErrors.map((err, i) => (
+                  <li key={i}>{err}</li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div>
@@ -103,7 +130,11 @@ const ResetPasswordPage = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
-            disabled={isLoading}
+            disabled={
+              isLoading ||
+              passwordErrors.length > 0 ||
+              password !== confirmPassword
+            }
             className="w-full mt-4 bg-linear-to-r from-[#4DA19F] to-[#334F4F] text-white font-semibold py-3 rounded-2xl shadow-md hover:from-[#334F4F] hover:to-[#4DA19F] disabled:opacity-50"
           >
             {isLoading ? (
