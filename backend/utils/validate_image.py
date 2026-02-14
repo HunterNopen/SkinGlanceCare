@@ -9,8 +9,8 @@ def validate_image(file: UploadFile):
     ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP"}
     MAX_WIDTH = 4096
     MAX_HEIGHT = 4096
-    MIN_WIDTH = 224
-    MIN_HEIGHT = 224
+    MIN_WIDTH = 12
+    MIN_HEIGHT = 12
 
     file.file.seek(0, 2)
     file_size = file.file.tell()
