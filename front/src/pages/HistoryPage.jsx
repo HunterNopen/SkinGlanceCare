@@ -9,18 +9,23 @@ const parseImageResult = (image) => {
 
   return {
     ...image,
+
     predicted_class: resultData.predicted_class || "?",
     predicted_class_full:
       resultData.predicted_class_full ||
       resultData.predicted_class ||
       "Unknown",
-    predicted_probability: resultData.predicted_probability || 0,
-    cancer_probability: resultData.cancer_probability || 0,
-    confidence_score: resultData.certainty_score || 0,
-    confidence_top3_score: resultData.confidence_top3_score || 0,
+
+    predicted_probability: resultData.predicted_probability ?? null,
+    cancer_probability: resultData.cancer_probability ?? null,
+
+    certainty_score: resultData.certainty_score ?? null,
+    model_uncertainty: resultData.model_uncertainty ?? null,
+
     risk_level: resultData.risk_level || "UNKNOWN",
     recommendation: resultData.recommendation || "",
     llm_message: resultData.llm_message || "",
+
     raw_result: resultData,
   };
 };

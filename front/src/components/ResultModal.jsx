@@ -22,12 +22,12 @@ const Result = ({ analysis }) => {
     predicted_class,
     predicted_class_full,
     predicted_probability,
-    confidence_score,
-    confidence_top3_score,
-    llm_message,
+    certainty_score,
+    model_uncertainty,
+    cancer_probability,
     risk_level,
     recommendation,
-    cancer_probability,
+    llm_message,
   } = analysis;
 
   const imageUrl = filename
@@ -127,13 +127,13 @@ const Result = ({ analysis }) => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10 text-center">
+          <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10 text-center">
             <div>
               <p className="text-sm uppercase tracking-wide text-gray-500">
-                Model confidence
+                Certainty score
               </p>
               <p className="text-2xl font-semibold text-[#334F4F]">
-                {safeScore(confidence_score)}
+                {safeScore(certainty_score)}
               </p>
             </div>
 
@@ -143,6 +143,15 @@ const Result = ({ analysis }) => {
               </p>
               <p className="text-2xl font-semibold text-[#334F4F]">
                 {safePercent(cancer_probability)}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm uppercase tracking-wide text-gray-500">
+                Model uncertainty
+              </p>
+              <p className="text-2xl font-semibold text-[#334F4F]">
+                {safePercent(model_uncertainty)}
               </p>
             </div>
           </div>
