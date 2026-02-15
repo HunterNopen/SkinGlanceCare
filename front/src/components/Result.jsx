@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Info } from "lucide-react";
 
 const riskColors = {
   HIGH: "text-[#334F4F] bg-[#D7F6F5]",
@@ -21,8 +23,8 @@ const Result = ({ analysis }) => {
     predicted_class,
     predicted_class_full,
     predicted_probability,
-    confidence_score,
-    confidence_top3_score,
+    certainty_score,
+    model_uncertainty,
     cancer_probability,
     risk_level,
     recommendation,
@@ -130,13 +132,29 @@ const Result = ({ analysis }) => {
 
       {activeTab === "details" && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10 text-center">
+          <div className="flex items-center justify-center gap-10 mb-8">
+            <h3 className="text-xl font-semibold text-[#334F4F]">
+              Detailed metrics
+            </h3>
+
+            <Link
+              to="/EducationPage"
+              className="flex items-center gap-2 text-gray-400 hover:text-[#4DA19F] transition"
+              title="Learn how to interpret these metrics"
+            >
+              <Info size={18} />
+              <span className="text-sm hidden sm:inline">
+                How to read results
+              </span>
+            </Link>
+          </div>
+          <div className="mx-auto max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10 text-center">
             <div>
               <p className="text-sm uppercase tracking-wide text-gray-500">
-                Model confidence
+                Certainty score
               </p>
               <p className="text-2xl font-semibold text-[#334F4F]">
-                {safeScore(confidence_score)}
+                {safePercent(certainty_score)}
               </p>
             </div>
 
@@ -146,6 +164,15 @@ const Result = ({ analysis }) => {
               </p>
               <p className="text-2xl font-semibold text-[#334F4F]">
                 {safePercent(cancer_probability)}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm uppercase tracking-wide text-gray-500">
+                Model uncertainty
+              </p>
+              <p className="text-2xl font-semibold text-[#334F4F]">
+                {model_uncertainty}
               </p>
             </div>
           </div>

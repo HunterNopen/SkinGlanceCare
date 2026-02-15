@@ -34,8 +34,6 @@ const router = createBrowserRouter([
       { path: "ResetPassword", element: <ResetPasswordPage /> },
       { path: "EducationPage", element: <EducationPage /> },
       { path: "PolicyPage", element: <PolicyPage /> },
-
-      // protected routes
       {
         element: <ProtectedRoute />,
         children: [

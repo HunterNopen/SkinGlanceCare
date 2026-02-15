@@ -138,12 +138,11 @@ const ImageUploadPage = () => {
         <Result
           analysis={{
             image_id: uploadResult.image_id,
-            filename: uploadResult.filename || null,
             predicted_class: uploadResult.result.predicted_class,
             predicted_class_full: uploadResult.result.predicted_class_full,
             predicted_probability: uploadResult.result.predicted_probability,
-            confidence_score: uploadResult.result.certainty_score,
-            confidence_top3_score: null,
+            certainty_score: uploadResult.result.certainty_score,
+            model_uncertainty: uploadResult.result.model_uncertainty,
             cancer_probability: uploadResult.result.cancer_probability,
             risk_level: uploadResult.result.risk_level,
             recommendation: uploadResult.result.recommendation,
