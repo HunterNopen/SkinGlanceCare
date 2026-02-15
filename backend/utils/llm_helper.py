@@ -124,5 +124,10 @@ def build_gemini_message(prediction: Dict[str, Any]) -> str:
         if "response" in locals():
             print("Response text:", response.text)
         # error handling, return a fallback message
-        return "Error"
+        return (
+            "Our AI system has analyzed your photo and provided an estimate for "
+            "the type of skin lesion. This result is not a diagnosis. For your "
+            "safety, please discuss any concerns with a dermatologist or doctor, "
+            "especially if the spot is new, changing, or causing symptoms."
+        )
 
